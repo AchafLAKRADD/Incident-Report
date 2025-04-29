@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FedEx Sort Maintenance – Rapport d'Incident</title>
+<style>
+  /* — Base styles — */
+  @page { size:A4; margin:1.5cm; }
+  body   { font-family:'Arial Narrow',Arial,sans-serif; margin:0; padding:10px;
+           color:#424242; font-size:11pt; line-height:1.4; background:white; }
+  .header{ background:#4D148C; color:#fff; padding:10px 15px; font-weight:bold;
+           font-size:14pt; margin-bottom:20px; page-break-after:avoid; }
+  .subheader{ color:#FF6600; font-weight:bold; margin:15px 0 5px;
+              border-bottom:1px solid #DDD; padding-bottom:3px; page-break-after:avoid;}
+  table{ width:100%; border-collapse:collapse; margin:10px 0; page-break-inside:avoid; }
+  .fedex-table{ border:1px solid #DDD; }
+  .fedex-table th,.fedex-table td{ border:1px solid #DDD; padding:6px 8px; vertical-align:top; }
+  .fedex-table th{ background:#F2F2F2; text-align:left; font-weight:bold; }
+  .section{ margin-bottom:20px; page-break-inside:avoid; }
+  .root-cause{ margin-bottom:15px; page-break-inside:avoid; }
+
+  /* Print refinements */
+  @media print{
+    body{ margin:0; padding:0; }
+    .no-print,.no-print *{ display:none!important; }
+    .photo-container,.section{ break-inside:avoid; }
+    .photo-box{ min-height:150px; break-inside:avoid; }
+    .major-section{ page-break-before:always; }
+    .first-section{ page-break-before:avoid; }
+    .diagnostic-section,.photos-section{ page-break-before:always; }
+  }
+
+  /* Photos */
+  .photo-container{ display:flex; flex-wrap:wrap; gap:15px; margin-top:10px; }
+  .photo-box{ width:48%; border:1px solid #DDD; padding:8px; page-break-inside:avoid; }
+  .photo-label{ font-weight:bold; margin-bottom:5px; }
+  .photo-comment{ margin-bottom:10px; }
+
+  /* Buttons, log */
+  .add-photo-btn{ background:#4D148C; color:#fff; border:none; padding:5px 10px; cursor:pointer;
+                  font-size:10pt; border-radius:5px; }
+  .add-photo-btn:hover{ background:#3D0C6C; }
+  .log-box{ border:1px solid #CCC; background:#F7F7F7; padding:8px; max-height:200px;
+            overflow:auto; font-family:monospace; font-size:9pt; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<!-- ▍ WO loader (screen) -->
+<div class="no-print">
+  <p><strong>N° WO :</strong>
+     <input id="wo-input" placeholder="WO1367291" style="width:120px">
+     <button class="add-photo-btn" onclick="loadWO()">Charger WO</button>
+  </p>
+</div>
+
+<div class="header">FedEx Sort Maintenance – Rapport d'Incident</div>
+
+<!-- ▍ Informations de base -->
+<div class="section first-section">
+  <div class="subheader">Informations de Base</div>
+  <table class="fedex-table">
+    <tr><th width="15%">Date</th><td width="35%" id="current-date">-</td>
+        <th width="15%">Système</th><td width="35%" id="system-field">-</td></tr>
+    <tr><th>Emplacement</th><td id="location-field">-</td>
+        <th>Équipement</th><td id="assetnum-field">-</td></tr>
+    <tr><th>Panne</th><td id="description-field" colspan="3">-</td></tr>
+  </table>
+</div>
+
+<!-- ▍ Intervention -->
+<div class="section">
+  <div class="subheader">Intervention</div>
+  <table class="fedex-table">
+    <tr><th width="15%">N° WO</th><td id="wonum-field">-</td></tr>
+    <tr><th>Statut WO</th><td id="status-field">-</td></tr>
+    <tr><th>Date créée</th><td id="reportdate-field">-</td></tr>
+  </table>
+</div>
+
+<!-- ▍ Temps d'arrêt -->
+<div class="section">
+  <div class="subheader">Temps d'arrêt</div>
+  <table class="fedex-table">
+    <tr><th width="15%">Début</th><td width="35%" id="downtime-start">-</td>
+        <th width="15%">Fin</th><td width="35%" id="downtime-finish">-</td></tr>
+    <tr><th>Durée totale</th><td id="downtime-total">-</td>
+        <th>Impact OPS (Roll Over)</th><td id="rollover-field">-</td></tr>
+  </table>
+</div>
+
+<!-- ▍ Type de panne -->
+<div class="section">
+  <div class="subheader">Type de panne</div>
+  <table class="fedex-table">
+    <tr>
+      <td width="25%"><input type="checkbox" id="mechanical-checkbox"> Mécanique</td>
+      <td width="25%"><input type="checkbox" id="electrical-checkbox"> Électrique</td>
+      <td width="25%"><input type="checkbox" id="comm-checkbox"> Communication</td>
+      <td width="25%"><input type="checkbox" id="other-checkbox"> Autre</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ▍ Étapes du diagnostic -->
+<div class="section diagnostic-section">
+  <div class="subheader">Étapes du diagnostic</div>
+  <div class="root-cause"><strong>1. Incident Type</strong><p id="rca-type-field"></p></div>
+  <div class="root-cause"><strong>2. Incident Timeline</strong><p id="rca-timeline-field"></p></div>
+  <div class="root-cause"><strong>3. Root Cause Analysis – 5 Why’s</strong><p id="rca-method-field"></p></div>
+  <div class="root-cause"><strong>4. Root Cause</strong><p id="rootcause-desc-field"></p></div>
+</div>
+
+<!-- ▍ Commentaires -->
+<div class="section">
+  <div class="subheader">Commentaires</div>
+  <textarea id="comments-field" rows="4" style="width:100%" placeholder="Ajoutez vos commentaires ici…"></textarea>
+</div>
+
+<!-- ▍ Photos -->
+<div class="section photos-section">
+  <div class="subheader">Photos</div>
+  <div class="photo-container" id="photo-container">
+    <div class="photo-box">
+      <div class="photo-label">Photo 1</div>
+      <div class="photo-comment">Commentaire 1</div>
+      <input type="file" accept="image/*" class="no-print">
+      <div class="photo-placeholder"></div>
+    </div>
+  </div>
+  <button class="add-photo-btn no-print" onclick="addPhotoBox()">Ajouter une photo +</button>
+</div>
+
+<!-- ▍ Actions (screen) -->
+<div class="no-print" style="margin-top:20px">
+  <button class="add-photo-btn" onclick="generatePDF()">Générer PDF</button>
+</div>
+
+<!-- ▍ Journal (screen) -->
+<div class="section no-print">
+  <div class="subheader">Journal</div>
+  <pre id="log-content" class="log-box"></pre>
+</div>
+
+<!-- ▍ Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+/* 1. Logger */
+const log = m => {
+  const box=document.getElementById('log-content');
+  box.textContent+=`[${new Date().toLocaleTimeString('fr-FR')}] ${m}\n`;
+  box.scrollTop=box.scrollHeight;
+};
+
+/* 2. Field ↔ Maximo map */
+const fieldMap={
+  'current-date'        :'actfinish||actstart||reportdate',
+  'system-field'        :'worktype',
+  'location-field'      :'location.location||location',
+  'assetnum-field'      :'asset.ASSETTAG',
+  'description-field'   :'description',
+  'wonum-field'         :'wonum',
+  'status-field'        :'status',
+  'reportdate-field'    :'reportdate',
+  'downtime-start'      :'actstart',
+  'downtime-finish'     :'actfinish',
+  'downtime-total'      :'moddowntimehist.downtime',
+  'rollover-field'      :'fdxopsimpact||fdxrolloverimpact',
+  'rca-type-field'      :'fdxrcaincidenttyp',
+  'rca-timeline-field'  :'fdxrcainctimeldesc_longdescription',
+  'rca-method-field'    :'fdxrcaanalysismet_longdescription',
+  'rootcause-desc-field':'fdxrcarootcause_longdescription',
+  'comments-field'      :'description_longdescription'
+};
+
+/* 3. Helpers */
+const getPathVal=(obj,path)=>{
+  for(const part of path.split('.')){
+    if(!obj) return;
+    if(part.includes('[')){
+      const [prop,idx]=part.match(/([^\[]+)\[(\d+)\]/).slice(1);
+      obj=obj?.[prop]?.[+idx];
+    }else obj=obj?.[part];
+  }
+  return obj;
+};
+const getVal=(rec,spec)=>{
+  for(const alt of spec.split('||')){
+    const v=getPathVal(rec,alt);
+    if(v!==undefined&&v!==null&&v!=='') return v;
+  }
+};
+const cleanHTML=h=>{
+  if(typeof h!=='string') return h;
+  const d=document.createElement('div'); d.innerHTML=h;
+  return d.textContent.trim();
+};
+
+/* 4. Populate UI */
+function populateForm(rec){
+  for(const k in rec){
+    if(/LONGDESCRIPTION/i.test(k)) rec[k]=cleanHTML(rec[k]);
+  }
+  for(const [id,path] of Object.entries(fieldMap)){
+    const el=document.getElementById(id); if(!el) continue;
+    let v=getVal(rec,path); if(v===undefined) v='-';
+    if(/date|time|act/i.test(id)&&/^\d{4}-\d{2}-\d{2}/.test(v))
+      v=new Date(v).toLocaleString('fr-FR');
+    if(el.tagName==='TEXTAREA') el.value=v; else el.textContent=v;
+  }
+
+  /* Map failure class → checkboxes */
+  const fc=(rec.failurecode||'').toLowerCase();
+  document.getElementById('mechanical-checkbox').checked = fc.includes('mec');
+  document.getElementById('electrical-checkbox').checked = fc.includes('ele');
+  document.getElementById('comm-checkbox')      .checked = fc.includes('com');
+  document.getElementById('other-checkbox')     .checked = fc.includes('oth');
+}
+
+/* 5. Photos */
+function addPhotoBox(){
+  const c=document.getElementById('photo-container');
+  const n=c.children.length+1;
+  const div=document.createElement('div');
+  div.className='photo-box';
+  div.innerHTML=`<div class="photo-label">Photo ${n}</div>
+                 <div class="photo-comment">Commentaire ${n}</div>
+                 <input type="file" accept="image/*" class="no-print">
+                 <div class="photo-placeholder"></div>`;
+  c.appendChild(div);
+}
+
+/* 6. OSLC select list */
+const selectFields=[...new Set(
+  Object.values(fieldMap).flatMap(p=>p.split('||'))
+    .filter(s=>!s.includes('[')).map(s=>s.toUpperCase())
+)];
+selectFields.push('FAILURECODE');
+const selectParam=selectFields.join(',');
+
+/* 7. Load WO */
+async function loadWO(){
+  const wonum=document.getElementById('wo-input').value.trim().toUpperCase();
+  if(!wonum){ alert('Numéro WO requis'); return; }
+  const key='mu23r5fahh0sbaqlpiahts79ovaqk0908duivbup',
+        base='https://main.manage.fxe-eu.suite.maximo.com/maximo/api/os/mxwo',
+        where=encodeURIComponent(`WOCLASS="WORKORDER" and WONUM="${wonum}"`),
+        target=`${base}?apikey=${key}&oslc.select=${selectParam}&oslc.pageSize=1`+
+               `&lean=1&ignorekeyref=1&ignorers=1&ignorecollectionref=1&oslc.where=${where}`,
+        url='https://api.allorigins.win/raw?url='+encodeURIComponent(target);
+
+  log('→ GET '+target);
+  try{
+    const t0=performance.now(), res=await fetch(url), t1=performance.now();
+    log(`← ${res.status} (${(t1-t0).toFixed(0)} ms)`);
+    if(!res.ok) throw new Error(res.status);
+    const json=await res.json();
+    if(!json.member?.length){ alert('WO non trouvé'); return; }
+    populateForm(json.member[0]); log('Formulaire mis à jour');
+  }catch(e){ log('Erreur : '+e.message); }
+}
+
+/* 8. PDF */
+function generatePDF(){
+  const opt={ margin:[0.8,0.8,0.8,0.8],
+    filename:'FedEx_Report.pdf',
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true,logging:false},
+    jsPDF:{unit:'cm',format:'a4',orientation:'portrait',compress:true},
+    pagebreak:{mode:['avoid-all','css','legacy']} };
+  const hidden=[...document.querySelectorAll('.no-print')];
+  hidden.forEach(e=>e.style.display='none');
+  html2pdf().set(opt).from(document.body).save()
+    .then(()=>{ hidden.forEach(e=>e.style.display=''); log('PDF généré'); })
+    .catch(err=>{ log('Erreur PDF : '+err); hidden.forEach(e=>e.style.display='');});
+}
+
+/* 9. Init */
+document.getElementById('current-date').textContent=
+  new Date().toLocaleDateString('fr-FR');
+
+document.addEventListener('change',e=>{
+  if(e.target.type==='file'){
+    const f=e.target.files[0];
+    if(f && f.type.startsWith('image/')){
+      const reader=new FileReader(), box=e.target.parentElement.querySelector('.photo-placeholder');
+      reader.onload=ev=>{
+        Object.assign(box.style,{
+          backgroundImage:`url(${ev.target.result})`, backgroundSize:'contain',
+          backgroundPosition:'center', backgroundRepeat:'no-repeat',
+          height:'150px', border:'1px dashed #ccc', margin:'5px 0'
+        });
+      };
+      reader.readAsDataURL(f);
+    }
+  }
+});
+</script>
+</body>
+</html>
+s
