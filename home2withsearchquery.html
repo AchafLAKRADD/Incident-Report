@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recherche Work Order - FedEx</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .navbar {
+      width: 100%;
+      background: #4d148c; /* Violet FedEx */
+      padding: 15px 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      user-select: none;
+      z-index: 10;
+    }
+    .logo {
+      height: 50px;
+    }
+
+    .hero {
+      margin: 60px 20px 100px;
+      background: white;
+      max-width: 480px;
+      border-radius: 12px;
+      box-shadow: 0 15px 30px rgba(77,20,140,0.2);
+      position: relative;
+      padding: 40px 35px 50px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 160px;
+      height: 160px;
+      background: #ff6600; /* Orange FedEx */
+      border-radius: 50%;
+      opacity: 0.15;
+      z-index: 0;
+      filter: blur(40px);
+    }
+
+    .hero h1 {
+      font-weight: 600;
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: #4d148c;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-family: 'Montserrat', Arial, sans-serif;
+    }
+
+    .search-btn {
+      width: 100%;
+      padding: 15px;
+      background-color: #4d148c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .search-btn:hover {
+      background-color: #3d0c6c;
+    }
+
+    .result-container {
+      margin-top: 30px;
+      display: none; /* Masqué par défaut */
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .result-table th, .result-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    .result-table th {
+      background-color: #f2f2f2;
+    }
+
+    .no-result {
+      text-align: center;
+      margin-top: 20px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <img class="logo" src="https://github.com/AchafLAKRADD/Incident-Report/blob/main/logoffm.png?raw=true" alt="Logo du Département" />
+  </nav>
+  <section class="hero" aria-label="Formulaire de recherche">
+    <h1>Recherche Work Order FedEx</h1>
+  </section>
+  <div class="search-container">
+    <input type="text" class="search-input" id="wo-input" placeholder="Entrez le numéro de Work Order" />
+    <button class="search-btn" onclick="searchWO()">Rechercher</button>
+    <div id="result-container" class="result-container">
+      <table class="result-table" id="result-table">
+        <!-- Les résultats seront affichés ici -->
+      </table>
+    </div>
+    <div id="no-result" class="no-result" style="display: none;">
+      Work order non trouvé.
+    </div>
+  </div>
+
+  <script>
+    function searchWO() {
+      const wonum = document.getElementById('wo-input').value.trim().toUpperCase();
+      if (!wonum) {
+        alert('Veuillez entrer un numéro de Work Order');
+        return;
+      }
+
+      // Rediriger vers la page de rapport avec le numéro de WO dans l'URL
+      window.location.href = `rapport.html?wo=${wonum}`;
+    }
+  </script>
+</body>
+</html>
